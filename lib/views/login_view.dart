@@ -15,7 +15,6 @@ class _LoginViewState extends State<LoginView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
 
-
   @override
   void initState() {
     _email = TextEditingController();
@@ -29,6 +28,7 @@ class _LoginViewState extends State<LoginView> {
     _password.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,12 +42,10 @@ class _LoginViewState extends State<LoginView> {
             options: DefaultFirebaseOptions.currentPlatform,
           ),
           builder: (context, snapshot) {
-            switch (snapshot.connectionState)
-            {
+            switch (snapshot.connectionState) {
               case ConnectionState.done:
                 return Column(
                   children: [
-
                     TextField(
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
@@ -65,29 +63,37 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     TextButton(
-                      onPressed: () async
-                      {
-                        try{
-
-
-                        final email= _email.text;
-                        final password = _password.text;
-                        final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-                        print(userCredential);
-                        }
-                        on FirebaseAuthException catch (e){
-                          if(e.code == "user-not-found")
+                      onPressed: () async {
+                        try {
+                          final email = _email.text;
+                          final password = _password.text;
+                          final userCredential = await FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
+                                  email: email, password: password);
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                              '/notes/',
+                                  (route)=> false);
+                          print(userCredential);
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == "user-not-found")
                             print("User can not found. Try again");
-                          else if(e.code == "weak-password")
+                          else if (e.code == "weak-password")
                             print("Weak password. Try a different password.");
-                          else if(e.code == "email-already-in-use")
+                          else if (e.code == "email-already-in-use")
                             print("Email is in use.");
-                          else if(e.code == "invalid-email")
+                          else if (e.code == "invalid-email")
                             print("Invalid email.");
                         }
                       },
                       child: Text("Login"),
                     ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            '/register/', (route) => false);
+                      },
+                      child: const Text("Not registered? Click to register!"),
+                    )
                   ],
                 );
               default:
